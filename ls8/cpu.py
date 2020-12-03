@@ -24,27 +24,20 @@ class CPU:
     def ram_write(self, address,  value):
         self.ram[address] = value
 
-    def load(self):
+    def load(self, file):
         """Load a program into memory."""
-
+        program = open(file, 'r')
         address = 0
 
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram_write(address, instruction)
+        for line in program:
+            if line[0] != "#" and len(line) > 1:
+                if "#" in line:
+                    self.ram_write(address, int(line.split("#")[0], 2))
+                else:
+                    self.ram_write(address, int(line[0:len(line) - 1], 2))
             address += 1
 
+        program.close()
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
