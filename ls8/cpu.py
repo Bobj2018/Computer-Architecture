@@ -14,7 +14,8 @@ class CPU:
         self.instructions = {
             "HLT": 0b00000001,
             "LDI": 0b10000010,
-            "PRN": 0b01000111
+            "PRN": 0b01000111,
+            "MUL": 0b10100010
         }
 
 
@@ -26,25 +27,28 @@ class CPU:
 
     def load(self, file):
         """Load a program into memory."""
+
         program = open(file, 'r')
         address = 0
 
         for line in program:
-            if line[0] != "#" and len(line) > 1:
-                if "#" in line:
-                    self.ram_write(address, int(line.split("#")[0], 2))
-                else:
-                    self.ram_write(address, int(line[0:len(line) - 1], 2))
+            split_line = line.split("#")[0].strip()
+
+            if split_line != "":
+                command = int(split_line, 2)
+                self.ram_write(address, command)
             address += 1
 
         program.close()
+        # print(self.ram)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -77,18 +81,19 @@ class CPU:
             instruction = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
+            operands = 0
 
             if instruction == self.instructions["LDI"]:
                 self.reg[operand_a] = operand_b
-
-            if instruction == self.instructions["PRN"]:
+                operands = 2
+            elif instruction == self.instructions["PRN"]:
                 print(self.reg[operand_a])
-
-            if instruction == self.instructions["HLT"]:
+                operands = 1
+            elif instruction == self.instructions["MUL"]:
+                operands = 2
+                self.reg[operand_a] *= self.reg[operand_b]
+            elif instruction == self.instructions["HLT"]:
                 self.running = False
 
-            self.pc += 1
-
-
-
-        pass
+            self.pc += (1 + operands)
+pass
