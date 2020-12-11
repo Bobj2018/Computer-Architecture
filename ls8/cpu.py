@@ -17,7 +17,9 @@ class CPU:
             "PRN": 0b01000111,
             "MUL": 0b10100010,
             "POP": 0b01000110,
-            "PUSH": 0b01000101
+            "PUSH": 0b01000101,
+            "CALL": 0b01010000,
+            "RET": 0b00010001
         }
         self.reg[7] = 0xF4
 
@@ -84,29 +86,37 @@ class CPU:
             instruction = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            operands = 0
+            num_of_operands = instruction >> 6
 
             if instruction == self.instructions["LDI"]:
                 self.reg[operand_a] = operand_b
-                operands = 2
             elif instruction == self.instructions["PRN"]:
                 print(self.reg[operand_a])
-                operands = 1
             elif instruction == self.instructions["MUL"]:
-                operands = 2
                 self.reg[operand_a] *= self.reg[operand_b]
             elif instruction == self.instructions["PUSH"]:
-                operands = 1
                 self.reg[7] -= 1
                 value = self.reg[operand_a]
                 self.ram[self.reg[7]] = value
             elif instruction == self.instructions["POP"]:
-                operands = 1
                 SP = self.reg[7]
                 value = self.ram[SP]
                 self.reg[operand_a] = value
                 self.reg[7] += 1
             elif instruction == self.instructions["HLT"]:
                 self.running = False
+            elif instruction == self.instructions["CALL"]:
+                self.reg[7] -= 1
+                self.ram[self.reg[7]] = self.pc + 2
 
-            self.pc += (1 + operands)
+                # jump_to_address = self.reg[operand_a]
+                # self.pc = jump_to_address
+
+                self.pc = self.reg[operand_a]
+            elif instruction == self.instructions['RET']:
+                self.pc = self.ram[self.reg[7]]
+
+            sets_pc = ((instruction >> 4) & 0b001) == 0b001
+
+            if not sets_pc:
+                self.pc += (1 + num_of_operands)
