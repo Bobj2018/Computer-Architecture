@@ -15,8 +15,11 @@ class CPU:
             "HLT": 0b00000001,
             "LDI": 0b10000010,
             "PRN": 0b01000111,
-            "MUL": 0b10100010
+            "MUL": 0b10100010,
+            "POP": 0b01000110,
+            "PUSH": 0b01000101
         }
+        self.reg[7] = 0xF4
 
 
     def ram_read(self, address):
@@ -92,8 +95,18 @@ class CPU:
             elif instruction == self.instructions["MUL"]:
                 operands = 2
                 self.reg[operand_a] *= self.reg[operand_b]
+            elif instruction == self.instructions["PUSH"]:
+                operands = 1
+                self.reg[7] -= 1
+                value = self.reg[operand_a]
+                self.ram[self.reg[7]] = value
+            elif instruction == self.instructions["POP"]:
+                operands = 1
+                SP = self.reg[7]
+                value = self.ram[SP]
+                self.reg[operand_a] = value
+                self.reg[7] += 1
             elif instruction == self.instructions["HLT"]:
                 self.running = False
 
             self.pc += (1 + operands)
-pass
