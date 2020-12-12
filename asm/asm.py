@@ -275,11 +275,11 @@ def pass1(inputfile, sym, code):
             # Makes sure we have right operand count
             if found < desired:
                 print(f"Line {line_num}: missing operand to {opcode}",
-                      file=sys.stderr)
+                    file=sys.stderr)
                 sys.exit(1)
             elif found > desired:
                 print(f"Line {line_num}: unexpected operand to {opcode}",
-                      file=sys.stderr)
+                    file=sys.stderr)
                 sys.exit(1)
 
         # Make sure we know this opcode at all
